@@ -9,7 +9,7 @@ fftn = 2000;
 
 
 f1=20; f2=10; 
-Amp_2 = 5;
+Amp_2 = 1;
 % u = Amp_2.*( 0.6 + 0.1*cos(2.*f1.*pi.*tspan)); 
 u = Amp_2 .* (3/(2*pi)).*(sin(2.*f1.*pi.*tspan)-sin(2.*f2.*pi.*tspan))./tspan;
 
