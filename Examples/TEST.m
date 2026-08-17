@@ -1,4 +1,6 @@
 clear all;clc;close all
+
+addpath('C:\Users\rajin\OneDrive - Coventry University\PhD project\GitHub\NL-FRA\NOFRF\');
 %%
 Fs = 500;%1540
 Ts = 1/Fs;%(2*pi)
