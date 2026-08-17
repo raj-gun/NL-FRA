@@ -1,0 +1,95 @@
+clear all;clc;close all
+%%
+Fs = 500;%1540
+Ts = 1/Fs;%(2*pi)
+tspan = [-2+0.5*Ts:Ts:2+0.5*Ts]; tspan_org = tspan;
+fftn = 2000;
+
+
+f1=20; f2=10; 
+Amp_2 = 5;
+% u = Amp_2.*( 0.6 + 0.1*cos(2.*f1.*pi.*tspan)); 
+u = Amp_2 .* (3/(2*pi)).*(sin(2.*f1.*pi.*tspan)-sin(2.*f2.*pi.*tspan))./tspan;
+
+len = length(u);
+
+%-------------------------------
+A = Amp_2.*[linspace(1.1,1.25,5)'];
+n_A = length(A);
+Y = zeros(len,n_A);
+
+ode_func = @(t,y,Amp) ODE_func(t,y,f1,0,Amp); %ODE function
+y0 = [0,0];
+Y = NOFRF_data_sim(ode_func,tspan,n_A,A,Y,y0);%Simulate system to obtain dataset for NOFRFs
+
+%-------------------------------
+
+% [c,zc_tspan] = min(abs(tspan));
+% tspan = tspan(zc_tspan:end);
+% u = u(zc_tspan:end);
+% Y = Y(zc_tspan:end,:);
+
+len = length(u);
+len_adj = len;len_adj = fftn;
+len_adj_hlf = floor(len_adj/2)+1;
+w = [0:Fs/len_adj:(Fs/2)];%[0:Fs/len_adj:(Fs/2)+(Fs/len_adj)];%
+
+
+disp(['Inpt Amps = ',num2str(A')]);
+disp('Simulations complete');
+
+
+%%
+nl_ord_set = [1:5];
+N = max(nl_ord_set);
+displ = 1;
+
+%% NOFRFs testing
+
+%--------------------------
+Amp = 1.3;
+tspan = tspan_org;
+
+% u = Amp_2.*( 0.6 + 0.1*cos(2.*f1.*pi.*tspan)); 
+u = Amp_2 .* (3/(2*pi)).*(sin(2.*f1.*pi.*tspan)-sin(2.*f2.*pi.*tspan))./tspan;
+
+y0 = [0 0]';
+y = ode4(@(t,y) ode_func(t,y,Amp*Amp_2),tspan,y0);
+y_test = y(:,1);
+
+%%
+
+u_nofrf = u;
+gc= 'b';
+harm_inpt = 0;
+lw=0.5;
+displ = [1,1,1];
+norm = 0;
+
+[Norm_SSE_abs_LS_2,Norm_SSE_arg_LS_2,Norm_SSE_LS_2,Fe_n_Yn,Fe_p_Yn,Y_NOFRF_MLS_n,Y_NOFRF_LS_2,G_LS_2,sse,Y_model] = ...
+    SISO_NOFRF(Fs,Ts,tspan,fftn,f1,f2,u_nofrf,A,Amp,nl_ord_set,gc,harm_inpt,lw,norm,displ,Y, y_test);
+
+
+
+
+
+%% ODE func
+
+function dy=ODE_func(t,Y,f1,f2,Amp)
+%%
+PE = Amp.*(3/(2*pi)).*(sin(2.*f1.*pi.*t)-sin(2.*f2.*pi.*t))./t;%Amp.*( 0.6 + 0.1*cos(2.*f1.*pi.*t));% + Amp.*(sin(2.*f2.*pi.*t));% + Amp.*(sin(2.*3*f1.*pi.*t)); Amp.*cos(2.*f1.*pi.*t);%
+PI = 0;%Amp.*( 0.6 + 0.1*cos(2.*f1.*pi.*t));
+%%
+tau_e = 0.0035; tau_i = 0.0052; 
+T_EE = 2.4; T_EI = 2; T_IE = 2.1; T_II = 0;
+r =4; S_0 = 1; v_0 = 1;
+
+
+x1 = PE + T_EE*Y(1) - T_IE*Y(2);
+x2 = PI + T_EE*Y(1) - T_II*Y(2);
+
+dy = [(-1/tau_e)*Y(1) + (1/tau_e)*( S_0 / ( 1 + exp(-r*(x1-v_0)) ) );...
+      (-1/tau_i)*Y(2) + (1/tau_i)*( S_0 / ( 1 + exp(-r*(x2-v_0)) ) )];
+
+
+end
