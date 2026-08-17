@@ -34,7 +34,7 @@ if draw_plt == 1
     x_rng = [0,max(w(freq_rng_all))];
     figure;subplot(2,1,1);
     if harm_inpt == 0
-        plot(w,abs(Y_vec));hold on;plot(w,abs(Y_NOFRF_LS_2),'r--');set(gca, 'YScale', 'log');
+        plot(w,abs(Y_vec));hold on;plot(w,abs(Y_NOFRF_LS_2),'r--');%set(gca, 'YScale', 'log');
     else
         stem(w(logical(freq_rng_all)) ,  abs( Y_vec(logical(freq_rng_all)) ) ,'LineWidth',lw);axis([x_rng -inf inf]);hold on;
         stem(w(logical(freq_rng_all)) ,  abs( Y_NOFRF_LS_2(logical(freq_rng_all)) ), 'Color' , 'r','LineWidth',lw);
