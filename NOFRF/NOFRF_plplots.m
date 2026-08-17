@@ -15,8 +15,8 @@ for i = 1:N
         rho = abs(G_LS_2(logical(rmv_U_mat(:,i)),i));
     end
     
-    %polarplot( theta , rho  ,'Color',c,'LineWidth',lw);
-    polarscatter( theta , rho  ,'MarkerFaceColor',c);
+    polarplot( theta , rho  ,'Color',c,'LineWidth',lw);
+    % polarscatter( theta , rho  ,'MarkerFaceColor',c);
     
     title(['G',num2str(i)]);
 end
