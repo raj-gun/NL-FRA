@@ -7,7 +7,7 @@ if f2 > f1
     return;
 end
 
-%len = length(u);
+% dat_len = length(u);
 len_adj = fftn;%2^nextpow2(len);
 len_adj_hlf = floor(len_adj/2)+1;
 n_A = length(A);

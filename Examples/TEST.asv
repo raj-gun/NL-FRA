@@ -4,9 +4,9 @@ addpath('C:\Users\rajin\OneDrive - Coventry University\PhD project\GitHub\NL-FRA
 %%
 Fs = 20000;
 Ts = 1/Fs;%(2*pi)
-tspan = [-10+0.5*Ts:Ts:10+0.5*Ts]; %tspan_org = tspan;
-fftn = length(tspan);
-%% Generate data to evaluate NOFRFs
+tspan = [-10+0.5*Ts:Ts:10+0.5*Ts]; tspan_org = tspan;
+fftn = length(tspan)-1;
+
 
 f1=70; f2=60; %f1 > f2 always!
 Amp_2 = 9.8;
@@ -16,39 +16,19 @@ u = Amp_2 .* (3/(2*pi)).*(sin(2.*f1.*pi.*tspan)-sin(2.*f2.*pi.*tspan))./tspan;
 len = length(u);
 
 %-------------------------------
-A = [1, 0.85, 0.7, 0.55, 0.4]';% [linspace(1.1,1.25,5)']; %
+A = Amp_2.*[1, 0.85, 0.7, 0.55, 0.4]';%[linspace(1.1,1.25,5)'];
 n_A = length(A);
 Y = zeros(len,n_A);
 
-ode_func = @(t,y,Amp) ODE_func(t,y,f1,f2, Amp*Amp_2); %ODE function
+ode_func = @(t,y,Amp) ODE_func(t,y,f1,f2,Amp); %ODE function
 y0 = [0,0]';
 Y = NOFRF_data_sim(ode_func,tspan,n_A,A,Y,y0);%Simulate system to obtain dataset for NOFRFs
 
 %-------------------------------
 
-%% NOFRFs testing
-
-%--------------------------
-Amp = 1.1;
-%tspan = tspan_org;
-
-% u = Amp_2.*( 0.6 + 0.1*cos(2.*f1.*pi.*tspan)); 
-% u = Amp_2 .* (3/(2*pi)).*(sin(2.*f1.*pi.*tspan)-sin(2.*f2.*pi.*tspan))./tspan;
-
-y0 = [0 0]';
-y = ode4(@(t,y) ode_func(t,y,Amp),tspan,y0); 
-% y = RK4_solver(@(t,y) ode_func(t,y,Amp) , [tspan(1), tspan(end)], y0, Ts);
-y_test = y(:,1);
-%%
-
-% M = 20;
-% [u,      Fs_new] = FIR_downsample(u', Fs, M);
-% tspan = tspan(1:M:end);
-% [Y,      Fs_new] = FIR_downsample(Y, Fs, M);
-% [y_test, Fs_new] = FIR_downsample(y_test, Fs, M);
-% Fs = Fs_new;
-% Ts = 1/Fs;%(2*pi)
-% fftn = length(tspan)-1;
+[u,Fs_new] = FIR_downsample(u, Fs, 20);
+[tspan,Fs_new] = FIR_downsample(tspan, Fs, 20);
+[Y,Fs_new] = FIR_downsample(Y, Fs, 20);
 
 % [c,zc_tspan] = min(abs(tspan));
 % tspan = tspan(zc_tspan:end);
@@ -67,16 +47,25 @@ disp('Simulations complete');
 u_fft = (Ts/len).*fft(u,len_adj);
 figure;plot(w, abs(u_fft(1:len_adj_hlf)));
 
-figure;plot(tspan, u);
-
-
+figure;plot(tspan_org, u);
 
 %%
 nl_ord_set = [1:5];
 N = max(nl_ord_set);
 displ = 1;
 
+%% NOFRFs testing
 
+%--------------------------
+Amp = 1;
+tspan = tspan_org;
+
+% u = Amp_2.*( 0.6 + 0.1*cos(2.*f1.*pi.*tspan)); 
+u = Amp_2 .* (3/(2*pi)).*(sin(2.*f1.*pi.*tspan)-sin(2.*f2.*pi.*tspan))./tspan;
+
+y0 = [0 0]';
+y = ode4(@(t,y) ode_func(t,y,Amp*Amp_2),tspan,y0); 
+y_test = y(:,1);
 
 %%
 
@@ -121,14 +110,17 @@ norm = 0;
 
 function dy=ODE_func(t,Y,f1,f2,Amp)
 
+%%
 u = Amp.*(3/(2*pi)).*(sin(2.*f1.*pi.*t)-sin(2.*f2.*pi.*t))./t;
 
+%%
 M = 0.013;
 C = 0.0607;
 K1 = 40;
 K3 = -2.1e5;
 K5 = 4.21e9;
 
+%%
 dy = [Y(2);...
       (1/M)*(u - C*Y(2) - K1*Y(1) - K3*Y(1)^3 - K5*Y(1)^5)];
 
@@ -136,30 +128,30 @@ end
 
 function [y,Fs_new] = FIR_downsample(x,Fs,M)
 
-% New sampling frequency
+%% New sampling frequency
 Fs_new = Fs/M;
 
-% Low-pass filter frequencies
+%% Low-pass filter frequencies
 Fstop = Fs_new/2;       % New Nyquist frequency
 Fpass = 0.8*Fstop;      % Passband edge
 
-% Filter specifications
+%% Filter specifications
 Rp = 0.01;              % Passband deviation
 Rs = 60;                % Stopband attenuation (dB)
 
 dev = [Rp 10^(-Rs/20)];
 
-% Automatically determine FIR filter order
+%% Automatically determine FIR filter order
 [N,Wn,beta,ftype] = kaiserord([Fpass Fstop], ...
                               [1 0],dev,Fs);
 
-% Design FIR filter
+%% Design FIR filter
 b = fir1(N,Wn,ftype,kaiser(N+1,beta),'noscale');
 
-% Apply low-pass filter
+%% Apply low-pass filter
 x_filt = filtfilt(b,1,x);
 
-% Downsample
+%% Downsample
 y = x_filt(1:M:end,:);
 
 end
