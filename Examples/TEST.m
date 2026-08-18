@@ -2,13 +2,13 @@ clear all;clc;close all
 
 addpath('C:\Users\rajin\OneDrive - Coventry University\PhD project\GitHub\NL-FRA\NOFRF\');
 %%
-Fs = 20000;
+Fs = 80000;
 Ts = 1/Fs;%(2*pi)
-tspan = [-10+0.5*Ts:Ts:10+0.5*Ts]; %tspan_org = tspan;
-fftn = length(tspan);
+tspan = [-5+0.5*Ts:Ts:5+0.5*Ts]; %tspan_org = tspan;
+fftn = length(tspan)-1;
 %% Generate data to evaluate NOFRFs
 
-f1=70; f2=60; %f1 > f2 always!
+f1=70; f2=50; %f1 > f2 always!
 Amp_2 = 9.8;
 % u = Amp_2.*( 0.6 + 0.1*cos(2.*f1.*pi.*tspan)); 
 u = Amp_2 .* (3/(2*pi)).*(sin(2.*f1.*pi.*tspan)-sin(2.*f2.*pi.*tspan))./tspan;
@@ -20,7 +20,7 @@ A = [1, 0.85, 0.7, 0.55, 0.4]';% [linspace(1.1,1.25,5)']; %
 n_A = length(A);
 Y = zeros(len,n_A);
 
-ode_func = @(t,y,Amp) ODE_func(t,y,f1,f2, Amp*Amp_2); %ODE function
+ode_func = @(t,y,Amp) ODE_func(t,y,f1,f2,Amp,Amp_2); %ODE function
 y0 = [0,0]';
 Y = NOFRF_data_sim(ode_func,tspan,n_A,A,Y,y0);%Simulate system to obtain dataset for NOFRFs
 
@@ -29,7 +29,7 @@ Y = NOFRF_data_sim(ode_func,tspan,n_A,A,Y,y0);%Simulate system to obtain dataset
 %% NOFRFs testing
 
 %--------------------------
-Amp = 1.1;
+Amp = 1;
 %tspan = tspan_org;
 
 % u = Amp_2.*( 0.6 + 0.1*cos(2.*f1.*pi.*tspan)); 
@@ -37,18 +37,17 @@ Amp = 1.1;
 
 y0 = [0 0]';
 y = ode4(@(t,y) ode_func(t,y,Amp),tspan,y0); 
-% y = RK4_solver(@(t,y) ode_func(t,y,Amp) , [tspan(1), tspan(end)], y0, Ts);
 y_test = y(:,1);
 %%
 
-% M = 20;
-% [u,      Fs_new] = FIR_downsample(u', Fs, M);
-% tspan = tspan(1:M:end);
-% [Y,      Fs_new] = FIR_downsample(Y, Fs, M);
-% [y_test, Fs_new] = FIR_downsample(y_test, Fs, M);
-% Fs = Fs_new;
-% Ts = 1/Fs;%(2*pi)
-% fftn = length(tspan)-1;
+M = 20;
+[u,      Fs_new] = FIR_downsample(u', Fs, M);
+tspan = tspan(1:M:end);
+[Y,      Fs_new] = FIR_downsample(Y, Fs, M);
+[y_test, Fs_new] = FIR_downsample(y_test, Fs, M);
+Fs = Fs_new;
+Ts = 1/Fs;%(2*pi)
+fftn = length(tspan)-1;
 
 % [c,zc_tspan] = min(abs(tspan));
 % tspan = tspan(zc_tspan:end);
@@ -75,7 +74,6 @@ figure;plot(tspan, u);
 nl_ord_set = [1:5];
 N = max(nl_ord_set);
 displ = 1;
-
 
 
 %%
@@ -119,9 +117,10 @@ norm = 0;
 % end
 
 
-function dy=ODE_func(t,Y,f1,f2,Amp)
+function dy=ODE_func(t,Y,f1,f2,Amp,Amp_2)
 
-u = Amp.*(3/(2*pi)).*(sin(2.*f1.*pi.*t)-sin(2.*f2.*pi.*t))./t;
+u = Amp_2 .* (3/(2*pi)).*(sin(2.*f1.*pi.*t)-sin(2.*f2.*pi.*t))./t;
+u = Amp.*u;
 
 M = 0.013;
 C = 0.0607;
