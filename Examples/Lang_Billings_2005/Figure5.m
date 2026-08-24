@@ -9,6 +9,7 @@ clear all; clc; close all
 
 % Add NL-FRA functions using a path relative to this example file.
 addpath('C:\Users\rajin\OneDrive - Coventry University\PhD project\GitHub\NL-FRA\NOFRF\');
+addpath('C:\Users\rajin\OneDrive - Coventry University\PhD project\GitHub\NL-FRA\Examples');
 
 %% Sampling and input definition from Eq. (36)
 Fs = 200;               % Ts = 0.005 s in the paper
@@ -48,20 +49,6 @@ w = 0:Fs/len_adj:Fs/2;
 disp(['Input amplitude factors = ',num2str(A')]);
 disp('Simulations complete');
 
-u_fft = Ts.*fft(u,len_adj);
-figure;
-plot(w,abs(u_fft(1:len_adj_hlf)));
-xlabel('Frequency (Hz)');
-ylabel('|U(j2\pif)|');
-title('Lang & Billings (2005) first input spectrum');
-xlim([0 100]);
-
-figure;
-plot(tspan,u);
-xlabel('Time (s)');
-ylabel('u(t)');
-title('Lang & Billings (2005) first input');
-
 %% Evaluate NOFRFs up to fourth order
 nl_ord_set = 1:4;
 N = max(nl_ord_set);
@@ -79,26 +66,6 @@ u_nofrf = u;
  sse,Y_model] = ...
     SISO_NOFRF(Fs,Ts,tspan,fftn,f1,f2,u_nofrf,A,Amp, ...
     nl_ord_set,gc,harm_inpt,lw,norm,displ,Y,y_test);
-
-%% Figure 5-style view: |G_n(j2*pi*f)| over 10-20 Hz
-% SISO_NOFRF returns G_LS_2 with frequency along rows and order along
-% columns. Only frequencies at which a given NOFRF is defined are plotted.
-w_nofrf = (0:size(G_LS_2,1)-1).*(Fs/len_adj);
-fig5_rng = (w_nofrf >= 10) & (w_nofrf <= 20);
-
-figure;
-for n = 1:N
-    subplot(N,1,n);
-    plot(w_nofrf(fig5_rng),abs(G_LS_2(fig5_rng,n)),'LineWidth',0.8);
-    ylabel(['|G_',num2str(n),'|']);
-    xlim([10 20]);
-    if n == 1
-        title('Figure 5 reproduction: NOFRFs over 10-20 Hz');
-    end
-    if n == N
-        xlabel('f (Hz)');
-    end
-end
 
 %% Local Functions
 function dy = ODE_func(t,Y,f1,f2,Amp,Amp_2)
