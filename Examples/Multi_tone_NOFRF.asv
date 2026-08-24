@@ -1,8 +1,8 @@
 clear all; clc; close all
 
-% Multi-tone NOFRF example using the Duffing oscillator.
+% Multi-tone NOFRF example using the jump-phenomenon Duffing oscillator.
 % The NOFRFs are evaluated using three discrete input frequencies at
-% 5,7 and 8 Hz.
+% 5,7 an8 Hz.
 
 % Add NL-FRA functions using a path relative to this example file.
 addpath('C:\Users\rajin\OneDrive - Coventry University\PhD project\GitHub\NL-FRA\NOFRF\');
@@ -22,7 +22,7 @@ tspan = tspan_full(i_tz:end);
 tspan = tspan(1:fftn+1);
 len = length(tspan);
 
-pos_freq_comp = [5,7.5,15];
+pos_freq_comp = [5,7,8];
 
 u_full = cos(2*pi*pos_freq_comp(1)*tspan_full) + ...
          cos(2*pi*pos_freq_comp(2)*tspan_full) + ...

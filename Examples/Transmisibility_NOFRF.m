@@ -1,9 +1,7 @@
 clear; clc; close all;
 
 %%
-% Transmissibility and NOFRF analysis of the jump phenomenon.
-% The example follows the low-amplitude local approximation shown in
-% Figs. 5.9 and 5.10 of the MPhil thesis.
+% Transmissibility and NOFRF analysis.
 
 %% Repository paths
 addpath('C:\Users\rajin\OneDrive - Coventry University\PhD project\GitHub\NL-FRA\NOFRF\');
@@ -236,7 +234,7 @@ xlim([0 120]);
 function dy = ODE_func(t,Y,f1,Amp)
 
 w0 = 12*pi;
-C = 10*0.04*w0;
+C = 11*0.04*w0;
 K1 = w0^2;
 K3 = 0.1*w0^6;
 
