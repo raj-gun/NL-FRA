@@ -77,11 +77,13 @@ else
     stem(w(logical(freq_rng_all)) ,  abs( U_mat(logical(freq_rng_all),1) ),'LineWidth',lw);axis([x_rng -inf inf]);
 end
 subplot(2,1,2);
+Y_fft = fft(y_test,len_adj).*Ts;
+Y_vec = Y_fft(1:len_adj_hlf);
 if harm_inpt == 0
-    Y_fft = fft(y_test,len_adj).*Ts;
-    plot(w,abs( Y_fft(1:len_adj_hlf) ));hold on;plot(w,abs(Y_NOFRF_LS_2),'r--');set(gca, 'YScale', 'log');
+    plot(w,abs(Y_vec));hold on;plot(w,abs(Y_NOFRF_LS_2),'r--');set(gca, 'YScale', 'log');
 else
-    stem(w(logical(freq_rng_all)) ,  abs( Y_mat(logical(freq_rng_all),1) ),'LineWidth',lw);axis([x_rng -inf inf]);
+    stem(w(logical(freq_rng_all)) ,  abs( Y_vec(logical(freq_rng_all)) ),'LineWidth',lw);axis([x_rng -inf inf]);hold on;
+    stem(w(logical(freq_rng_all)) ,  abs( Y_NOFRF_LS_2(logical(freq_rng_all)) ),'r--','LineWidth',lw);
 end
 
 
