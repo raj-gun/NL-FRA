@@ -79,6 +79,9 @@ if draw_plt == 1
             title(['Y-norm',num2str(i)]);
             Y_NOFRF_MLS_n_t(:,i) = ifft(Y_NOFRF_MLS_n(:,i),'symmetric');
         end
+        if mod(i,2) == 1; ylabel('Magnitude'); end %Every odd nonlinearity
+        if i == nl_ord_set(find(mod(nl_ord_set, 2) == 0, 1, 'last')); xlabel('Freqeuncy (Hz)'); end %Last even nonlinerity
+        if i == nl_ord_set(find(mod(nl_ord_set, 2) ~= 0, 1, 'last')); xlabel('Freqeuncy (Hz)'); end %Last odd nonlinerity
     end
     sgtitle('Mag-OFRF \it Y_n(j\omega)\rm');
     

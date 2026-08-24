@@ -22,7 +22,7 @@ tspan = tspan_full(i_tz:end);
 tspan = tspan(1:fftn+1);
 len = length(tspan);
 
-pos_freq_comp = [5,7.5,15];
+pos_freq_comp = [5,7,8];
 
 u_full = cos(2*pi*pos_freq_comp(1)*tspan_full) + ...
          cos(2*pi*pos_freq_comp(2)*tspan_full) + ...
