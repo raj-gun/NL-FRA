@@ -6,7 +6,7 @@ Fs = 80000;
 Ts = 1/Fs;%(2*pi)
 tspan = [-5+0.5*Ts:Ts:5+0.5*Ts]; %tspan_org = tspan;
 fftn = length(tspan)-1;
-%% Generate data to evaluate NOFRFs
+%% Generate data using an ODE and RK4 to evaluate NOFRFs
 
 f1=70; f2=50; %f1 > f2 always!
 Amp_2 = 9.8;
@@ -36,9 +36,9 @@ Amp = 1;
 % u = Amp_2 .* (3/(2*pi)).*(sin(2.*f1.*pi.*tspan)-sin(2.*f2.*pi.*tspan))./tspan;
 
 y0 = [0 0]';
-y = ode4(@(t,y) ode_func(t,y,Amp),tspan,y0); 
+y = ode4(@(t,y) ode_func(t,y,Amp),tspan,y0); % RK4-based simulation
 y_test = y(:,1);
-%%
+%% Downsample to 1000 Hz
 
 M = 20;
 [u,      Fs_new] = FIR_downsample(u', Fs, M);
@@ -70,25 +70,22 @@ figure;plot(tspan, u);
 
 
 
-%%
+%% Evaluate NOFRFs
+
 nl_ord_set = [1:5];
 N = max(nl_ord_set);
 displ = 1;
 
-
-%%
-
-u_nofrf = u;
 gc= 'b';
 harm_inpt = 0;
 lw=0.5;
 displ = [1,1,1];
 norm = 0;
 
+u_nofrf = u;
+
 [Norm_SSE_abs_LS_2,Norm_SSE_arg_LS_2,Norm_SSE_LS_2,Fe_n_Yn,Fe_p_Yn,Y_NOFRF_MLS_n,Y_NOFRF_LS_2,G_LS_2,sse,Y_model] = ...
     SISO_NOFRF(Fs,Ts,tspan,fftn,f1,f2,u_nofrf,A,Amp,nl_ord_set,gc,harm_inpt,lw,norm,displ,Y, y_test);
-
-
 
 %%
 %%
