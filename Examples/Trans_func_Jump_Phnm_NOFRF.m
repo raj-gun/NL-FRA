@@ -1,327 +1,252 @@
 clear; clc; close all;
 
-%% NOFRF local approximation of Duffing jump phenomena
-% This example reproduces the analysis style of Figs. 5.9 and 5.10 in:
-% S. R. A. S. Gunawardena, "A Control Systems Perspective to Condition
-% Monitoring and Fault Diagnosis", MPhil thesis, University of Sheffield,
-% 2018, Chapter 5.
-%
-% The nonlinear oscillator is
-%
-%   y''(t) + C y'(t) + K1 y(t) + K3 y^3(t) = A cos(2*pi*f_F*t)
-%
-% with
-%   C  = 0.96*pi,
-%   K1 = (12*pi)^2,
-%   K3 = 0.1*(12*pi)^6.
-%
-% NOFRFs are evaluated locally over the low-amplitude interval
-%   A1 = [1.3, 1.2]
-% using N = 9 nonlinear orders. They are then tested outside this interval
-% at A_test = 1.5, as in Fig. 5.9 of the thesis.
-%
-% Only two figures are produced:
-%   Figure 1 - actual vs NOFRF-generated transmissibility (Fig. 5.9 style)
-%   Figure 2 - order-wise output contributions (Fig. 5.10 style)
+%%
+% Transmissibility and NOFRF analysis of the jump phenomenon.
+% The example follows the low-amplitude local approximation shown in
+% Figs. 5.9 and 5.10 of the MPhil thesis.
 
 %% Repository paths
 this_file = mfilename('fullpath');
 examples_dir = fileparts(this_file);
 repo_root = fileparts(examples_dir);
 addpath(fullfile(repo_root,'NOFRF'));
-addpath(examples_dir);  % ode4.m
+addpath(examples_dir);
 
-%% Frequency sweep and numerical settings
-% Fig. 5.9 spans approximately 0-35 Hz at the fundamental; the right-hand
-% plots use the corresponding third harmonic, 3*f_F.
-frq_rng = linspace(1,35,200);     % excitation frequency f_F (Hz)
-len_frq_rng = numel(frq_rng);
+%% Frequency range
+frq_rng = linspace(1,35,200);
+len_frq_rng = length(frq_rng);
 
-% Sampling must cover the highest NOFRF harmonic considered: 9*35 Hz.
-Fs = 1000;                        % sampling frequency (Hz)
+Fs = 1000;
 Ts = 1/Fs;
-fftn = 10000;                     % 10 s record -> 0.1 Hz FFT spacing
+fftn = 10000;
 
-% Simulate a transient before t = 0, then retain the steady-state record.
+% Simulate the transient before t = 0 and use the response after t = 0
+% for the NOFRF and transmissibility calculations.
 t_pre = 10;
 t_record = fftn/Fs;
 tspan_full = -t_pre:Ts:t_record;
 [~,i_tz] = min(abs(tspan_full));
 tspan = tspan_full(i_tz:end);
 tspan = tspan(1:fftn+1);
-len = numel(tspan);
+len = length(tspan);
 
 len_adj = fftn;
 len_adj_hlf = floor(len_adj/2)+1;
 
-%% NOFRF settings from the thesis low-amplitude local approximation
+%% NOFRF settings
 nl_ord_set = 1:9;
 N = max(nl_ord_set);
 
-% Nine amplitudes over A1 = [1.3,1.2], matching Table 2 / Fig. 5.8.
-A_eval = linspace(1.3,1.2,N)';
-n_A = numel(A_eval);
+% NOFRFs are evaluated over A1 = [1.3,1.2] using nine amplitudes.
+A = linspace(1.3,1.2,N)';
+n_A = length(A);
 
-% Fig. 5.9 tests the locally evaluated NOFRFs outside A1 at A_p = 1.5.
-A_test = 1.5;
+% The evaluated NOFRFs are tested outside A1 at A = 1.5.
+Amp = 1.5;
 
-% Current SISO_NOFRF options. All internal plotting is disabled because
-% this example produces only the two thesis-style figures below.
+% SISO_NOFRF display options
+% displ(1) - LS evaluation information
+% displ(2) - NOFRF prediction/validation plots
+% displ(3) - U_n, Y and valid-frequency plots
+% displ(4) - NOFRF magnitude/phase plots
 gc = 'b';
 harm_inpt = 1;
 lw = 0.5;
-norm_plot = 0;
+norm = 0;
 displ = [0,0,0,0];
 
 y0 = [0,0]';
 
-%% Storage
-G_cell = cell(1,len_frq_rng);
-Yn_cell = cell(1,len_frq_rng);
+%% Preallocate storage
+G_LS2_cell = cell(1,len_frq_rng);
 
-Trans_actual = NaN(len_frq_rng,1);
-Trans_NOFRF = NaN(len_frq_rng,1);
-Trans3_actual = NaN(len_frq_rng,1);
-Trans3_NOFRF = NaN(len_frq_rng,1);
+Trns_func = zeros(len_frq_rng,1);
+Trns_func_3H = zeros(len_frq_rng,1);
+Trns_func_NOFRF_LS2 = zeros(len_frq_rng,1);
+Trns_func_NOFRF_LS2_3H = zeros(len_frq_rng,1);
 
-% Output-frequency contributions |Y_n| used for Fig. 5.10.
-Yn_fund = NaN(N,len_frq_rng);
-Yn_3H = NaN(N,len_frq_rng);
+% Output frequency response contribution from each nonlinear order.
+Yn_fund = zeros(N,len_frq_rng);
+Yn_3H = zeros(N,len_frq_rng);
 
-%% 1. Evaluate local NOFRFs over A1 = [1.3,1.2]
-for i = 1:len_frq_rng
-    f1 = frq_rng(i);
-    f2 = f1;                      % harmonic/single-tone input
-
-    % Unit-amplitude reference input. Constant amplitude scaling is handled
-    % through A_eval by SISO_NOFRF/NOFRF_LS2.
-    u_full = cos(2*pi*f1*tspan_full);
-    u_ref = u_full(i_tz:end);
-    u_ref = u_ref(1:len);
-
-    % Generate the nine input-output experiments used for LS evaluation.
-    ode_func = @(t,y,Amp) duffing_jump_oscillator(t,y,f1,Amp);
-    Y_full = zeros(numel(tspan_full),n_A);
-    Y_full = NOFRF_data_sim(ode_func,tspan_full,n_A,A_eval,Y_full,y0);
-    Y_train = Y_full(i_tz:end,:);
-    Y_train = Y_train(1:len,:);
-
-    % SISO_NOFRF requires a validation response. Use the upper edge of the
-    % local evaluation interval; internal validation plots are disabled.
-    y_eval_full = ode4(@(t,y) ode_func(t,y,A_eval(1)),tspan_full,y0);
-    y_eval = y_eval_full(i_tz:end,1);
-    y_eval = y_eval(1:len);
-
-    [~,~,~,~,~,~,~,G_LS_2,~,~] = ...
-        SISO_NOFRF(Fs,Ts,tspan,fftn,f1,f2,u_ref,A_eval,A_eval(1), ...
-        nl_ord_set,gc,harm_inpt,lw,norm_plot,displ,Y_train,y_eval);
-
-    G_cell{i} = G_LS_2;
-
-    if mod(i,20) == 0 || i == len_frq_rng
-        fprintf('NOFRF evaluation: %d/%d excitation frequencies complete.\n', ...
-            i,len_frq_rng);
-    end
-end
-
-%% 2. Test the local NOFRFs at A_test = 1.5
+%% Evaluate NOFRFs
 for i = 1:len_frq_rng
     f1 = frq_rng(i);
     f2 = f1;
 
-    u_ref_full = cos(2*pi*f1*tspan_full);
-    u_ref = u_ref_full(i_tz:end);
-    u_ref = u_ref(1:len);
-    u_test = A_test.*u_ref;
+    u_full = cos(2*pi*f1*tspan_full);
+    u = u_full(i_tz:end);
+    u = u(1:len);
 
-    % Direct nonlinear-system response at A_test.
-    ode_func = @(t,y,Amp) duffing_jump_oscillator(t,y,f1,Amp);
-    y_full = ode4(@(t,y) ode_func(t,y,A_test),tspan_full,y0);
+    % Generate the input-output data for NOFRF evaluation.
+    ode_func = @(t,y,Amp_i) ODE_func(t,y,f1,Amp_i);
+    Y_full = zeros(length(tspan_full),n_A);
+    Y_full = NOFRF_data_sim(ode_func,tspan_full,n_A,A,Y_full,y0);
+    Y = Y_full(i_tz:end,:);
+    Y = Y(1:len,:);
+
+    % Response used by SISO_NOFRF for NOFRF testing/validation.
+    y_full = ode4(@(t,y) ode_func(t,y,A(1)),tspan_full,y0);
     y_test = y_full(i_tz:end,1);
     y_test = y_test(1:len);
 
-    Y_fft_full = fft(y_test,len_adj).*Ts;
-    U_fft_full = fft(u_test,len_adj).*Ts;
-    Y_fft = Y_fft_full(1:len_adj_hlf);
-    U_fft = U_fft_full(1:len_adj_hlf);
+    [~,~,~,~,~,~,~,G_LS_2,~,~] = ...
+        SISO_NOFRF(Fs,Ts,tspan,fftn,f1,f2,u,A,A(1), ...
+        nl_ord_set,gc,harm_inpt,lw,norm,displ,Y,y_test);
 
-    % Reconstruct the output using the locally evaluated NOFRFs.
-    G_LS_2 = G_cell{i};
-    [Yn,Y_NOFRF,len_NOFRF] = ...
-        nofrf_test(A_test,u_ref,G_LS_2,len_adj,len_adj_hlf, ...
-        N,Fs,Ts,f1,f2);
+    G_LS2_cell{i} = G_LS_2;
 
-    Y_NOFRF = [Y_NOFRF; zeros(len_adj_hlf-len_NOFRF,1)];
-    Yn = [Yn; zeros(len_adj_hlf-len_NOFRF,N)];
-    Yn_cell{i} = Yn;
-
-    % FFT bins for the excitation frequency and its third harmonic.
-    ind1 = round((f1/Fs)*len_adj)+1;
-    ind3 = round((3*f1/Fs)*len_adj)+1;
-
-    input_mag = abs(U_fft(ind1));
-    if input_mag == 0
-        continue;
-    end
-
-    % Fig. 5.9 quantities: transmissibility at f_F and 3*f_F.
-    Trans_actual(i) = abs(Y_fft(ind1))/input_mag;
-    Trans_NOFRF(i) = abs(Y_NOFRF(ind1))/input_mag;
-
-    if ind3 <= len_adj_hlf
-        Trans3_actual(i) = abs(Y_fft(ind3))/input_mag;
-        Trans3_NOFRF(i) = abs(Y_NOFRF(ind3))/input_mag;
-    end
-
-    % Fig. 5.10 quantities: individual nonlinear-order output responses.
-    for n = nl_ord_set
-        Yn_fund(n,i) = abs(Yn(ind1,n));
-        if ind3 <= size(Yn,1)
-            Yn_3H(n,i) = abs(Yn(ind3,n));
-        end
+    if mod(i,20) == 0 || i == len_frq_rng
+        disp(['NOFRF evaluation: ',num2str(i),'/',num2str(len_frq_rng)]);
     end
 end
 
-%% Error measures reported in the thesis discussion
-NMSE_Trans = nmse_valid(Trans_actual,Trans_NOFRF);
-NMSE_Trans3 = nmse_valid(Trans3_actual,Trans3_NOFRF);
+%% Generate transmissibility using the evaluated NOFRFs
+for i = 1:len_frq_rng
+    f1 = frq_rng(i);
+    f2 = f1;
 
-fprintf('\nTest amplitude A_test = %.3f\n',A_test);
-fprintf('NMSE fundamental transmissibility = %.6e\n',NMSE_Trans);
-fprintf('NMSE third-harmonic transmissibility = %.6e\n',NMSE_Trans3);
+    % Unit-amplitude reference input and the test input at Amp = 1.5.
+    u_ref_full = cos(2*pi*f1*tspan_full);
+    u_ref = u_ref_full(i_tz:end);
+    u_ref = u_ref(1:len);
+    u = Amp.*u_ref;
 
-%% Figure 1 - thesis Fig. 5.9 style
-% Top row: linear magnitude.
-% Bottom row: logarithmic magnitude.
-% Left: fundamental transmissibility versus excitation frequency f_F.
-% Right: third-harmonic transmissibility versus 3*f_F.
+    % Actual nonlinear-system response.
+    ode_func = @(t,y,Amp_i) ODE_func(t,y,f1,Amp_i);
+    y_full = ode4(@(t,y) ode_func(t,y,Amp),tspan_full,y0);
+    y = y_full(i_tz:end,1);
+    y = y(1:len);
+
+    y_fft = fft(y,len_adj).*Ts;
+    u_fft = fft(u,len_adj).*Ts;
+    Y_fft = y_fft(1:len_adj_hlf);
+    U_fft = u_fft(1:len_adj_hlf);
+
+    % Generate output response using the evaluated NOFRFs.
+    G_LS_2 = G_LS2_cell{i};
+    [Yn,Y_NOFRF,len_NOFRF] = ...
+        nofrf_test(Amp,u_ref,G_LS_2,len_adj,len_adj_hlf, ...
+        N,Fs,Ts,f1,f2);
+
+    Y_NOFRF = [Y_NOFRF;zeros(len_adj_hlf-len_NOFRF,1)];
+    Yn = [Yn;zeros(len_adj_hlf-len_NOFRF,N)];
+
+    % Frequency indices for the excitation frequency and the 3rd harmonic.
+    frq_ind = round((f1/Fs)*len_adj)+1;
+    frq_ind3 = round((3*f1/Fs)*len_adj)+1;
+
+    input_mag = abs(U_fft(frq_ind));
+
+    %% Transmissibility at excitation frequency
+    Trns_func(i) = abs(Y_fft(frq_ind))/input_mag;
+    Trns_func_NOFRF_LS2(i) = abs(Y_NOFRF(frq_ind))/input_mag;
+
+    %% Transmissibility at 3rd harmonic
+    Trns_func_3H(i) = abs(Y_fft(frq_ind3))/input_mag;
+    Trns_func_NOFRF_LS2_3H(i) = abs(Y_NOFRF(frq_ind3))/input_mag;
+
+    %% Contribution from each nonlinear order
+    for n = nl_ord_set
+        Yn_fund(n,i) = abs(Yn(frq_ind,n));
+        Yn_3H(n,i) = abs(Yn(frq_ind3,n));
+    end
+end
+
+%% NMSE
+NMSE_Trans = sum((Trns_func-Trns_func_NOFRF_LS2).^2)/var(Trns_func);
+NMSE_Trans_3H = sum((Trns_func_3H-Trns_func_NOFRF_LS2_3H).^2)/var(Trns_func_3H);
+
+disp(['NMSE_Trans    = ',num2str(NMSE_Trans)]);
+disp(['NMSE_Trans_3H = ',num2str(NMSE_Trans_3H)]);
+
+%% Actual and NOFRF generated transmissibility - Fig. 5.9
 figure;
 
 subplot(2,2,1);
-plot(frq_rng,Trans_actual,'.-'); hold on;
-plot(frq_rng,Trans_NOFRF,'o','MarkerSize',4);
-hold off; grid on;
-xlabel('Excitation frequency (Hz)');
-ylabel('|Trans(f_F)|');
-title('Fundamental transmissibility');
-legend('Actual','NOFRF estimate','Location','best');
+plot(frq_rng,Trns_func,'.-');hold on;
+plot(frq_rng,Trns_func_NOFRF_LS2,'o','MarkerSize',4);
+grid on;
+xlabel('Excitation Frequency (Hz)');
+ylabel('|Trans|');
+legend('Actual','NOFRFs estimate','Location','best');
 xlim([0 35]);
 
 subplot(2,2,2);
-plot(3*frq_rng,Trans3_actual,'.-'); hold on;
-plot(3*frq_rng,Trans3_NOFRF,'o','MarkerSize',4);
-hold off; grid on;
-xlabel('3rd-harmonic frequency (Hz)');
-ylabel('|Trans_3(3f_F)|');
-title('Third-harmonic transmissibility');
+plot(3.*frq_rng,Trns_func_3H,'.-');hold on;
+plot(3.*frq_rng,Trns_func_NOFRF_LS2_3H,'o','MarkerSize',4);
+grid on;
+xlabel('3 * Excitation Frequency (Hz)');
+ylabel('|Trans_3|');
 xlim([0 120]);
 
 subplot(2,2,3);
-semilogy(frq_rng,Trans_actual,'.-'); hold on;
-semilogy(frq_rng,Trans_NOFRF,'o','MarkerSize',4);
-hold off; grid on;
-xlabel('Excitation frequency (Hz)');
-ylabel('|Trans(f_F)|');
+semilogy(frq_rng,Trns_func,'.-');hold on;
+semilogy(frq_rng,Trns_func_NOFRF_LS2,'o','MarkerSize',4);
+grid on;
+xlabel('Excitation Frequency (Hz)');
+ylabel('|Trans| (log scale)');
 xlim([0 35]);
 
 subplot(2,2,4);
-semilogy(3*frq_rng,Trans3_actual,'.-'); hold on;
-semilogy(3*frq_rng,Trans3_NOFRF,'o','MarkerSize',4);
-hold off; grid on;
-xlabel('3rd-harmonic frequency (Hz)');
-ylabel('|Trans_3(3f_F)|');
+semilogy(3.*frq_rng,Trns_func_3H,'.-');hold on;
+semilogy(3.*frq_rng,Trns_func_NOFRF_LS2_3H,'o','MarkerSize',4);
+grid on;
+xlabel('3 * Excitation Frequency (Hz)');
+ylabel('|Trans_3| (log scale)');
 xlim([0 120]);
 
-sgtitle(sprintf('Actual and NOFRF-generated transmissibility, A = %.1f',A_test));
-
-%% Figure 2 - thesis Fig. 5.10 style
-% For the cubic Duffing oscillator under a harmonic input, the relevant
-% contributions are odd nonlinear orders. At the fundamental we display
-% n = 1,3,5,7,9. At 3*f_F, the first possible contributing odd order is 3,
-% so n = 3,5,7,9 are displayed as in the thesis discussion.
+%% Output frequency response contribution of each nonlinear order - Fig. 5.10
 odd_fund = 1:2:N;
 odd_3H = 3:2:N;
-
-legend_fund = arrayfun(@(n) sprintf('%d%s order contribution', ...
-    n,ordinal_suffix(n)),odd_fund,'UniformOutput',false);
-legend_3H = arrayfun(@(n) sprintf('%d%s order contribution', ...
-    n,ordinal_suffix(n)),odd_3H,'UniformOutput',false);
 
 figure;
 
 subplot(2,2,1);
 plot(frq_rng,Yn_fund(odd_fund,:)','.-');
 grid on;
-xlabel('Excitation frequency (Hz)');
-ylabel('|Y_n(f_F)|');
-title('Contributions at f_F');
-legend(legend_fund,'Location','best');
+xlabel('Excitation Frequency (Hz)');
+ylabel('Magnitude of Y_n');
+legend('1st order contribution','3rd order contribution', ...
+    '5th order contribution','7th order contribution', ...
+    '9th order contribution','Location','best');
 xlim([0 35]);
 
 subplot(2,2,2);
-plot(3*frq_rng,Yn_3H(odd_3H,:)','.-');
+plot(3.*frq_rng,Yn_3H(odd_3H,:)','.-');
 grid on;
-xlabel('3rd-harmonic frequency (Hz)');
-ylabel('|Y_n(3f_F)|');
-title('Contributions at 3f_F');
-legend(legend_3H,'Location','best');
+xlabel('3 * Excitation Frequency (Hz)');
+ylabel('Magnitude of Y_n');
+legend('3rd order contribution','5th order contribution', ...
+    '7th order contribution','9th order contribution', ...
+    'Location','best');
 xlim([0 120]);
 
 subplot(2,2,3);
 semilogy(frq_rng,Yn_fund(odd_fund,:)','.-');
 grid on;
-xlabel('Excitation frequency (Hz)');
-ylabel('|Y_n(f_F)|');
+xlabel('Excitation Frequency (Hz)');
+ylabel('Magnitude of Y_n (log scale)');
 xlim([0 35]);
 
 subplot(2,2,4);
-semilogy(3*frq_rng,Yn_3H(odd_3H,:)','.-');
+semilogy(3.*frq_rng,Yn_3H(odd_3H,:)','.-');
 grid on;
-xlabel('3rd-harmonic frequency (Hz)');
-ylabel('|Y_n(3f_F)|');
+xlabel('3 * Excitation Frequency (Hz)');
+ylabel('Magnitude of Y_n (log scale)');
 xlim([0 120]);
 
-sgtitle(sprintf('Order-wise NOFRF output contributions, A = %.1f',A_test));
+%% Local Functions
+function dy = ODE_func(t,Y,f1,Amp)
 
-%% Local functions
-function dy = duffing_jump_oscillator(t,Y,f_exc,Amp)
-% Duffing oscillator from Eq. (5.21) of the thesis:
-%   y'' + C*y' + K1*y + K3*y^3 = A*cos(2*pi*f_F*t)
+w0 = 12*pi;
+C = 2*0.04*w0;
+K1 = w0^2;
+K3 = 0.1*w0^6;
 
-C = 0.96*pi;
-K1 = (12*pi)^2;
-K3 = 0.1*(12*pi)^6;
+u = Amp.*cos(2*pi*f1*t);
 
-u = Amp*cos(2*pi*f_exc*t);
+dy = [Y(2);...
+      u - C.*Y(2) - K1.*Y(1) - K3.*Y(1).^3];
 
-dy = [Y(2); ...
-      u - C*Y(2) - K1*Y(1) - K3*Y(1)^3];
-end
-
-function value = nmse_valid(actual,estimate)
-% NMSE using finite points only.
-valid = isfinite(actual) & isfinite(estimate);
-a = actual(valid);
-e = estimate(valid);
-
-if isempty(a) || var(a) == 0
-    value = NaN;
-else
-    value = sum((a-e).^2)/var(a);
-end
-end
-
-function s = ordinal_suffix(n)
-% English ordinal suffix for plot legends.
-if mod(n,100) >= 11 && mod(n,100) <= 13
-    s = 'th';
-elseif mod(n,10) == 1
-    s = 'st';
-elseif mod(n,10) == 2
-    s = 'nd';
-elseif mod(n,10) == 3
-    s = 'rd';
-else
-    s = 'th';
-end
 end
