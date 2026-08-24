@@ -30,7 +30,7 @@ len_adj = fftn;
 len_adj_hlf = floor(len_adj/2)+1;
 
 %% NOFRF settings
-nl_ord_set = 1:7;
+nl_ord_set = [1:4];
 N = max(nl_ord_set);
 
 % NOFRFs are evaluated using the seven input amplitudes in equation (5.20).
