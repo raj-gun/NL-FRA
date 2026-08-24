@@ -8,11 +8,7 @@ clear all; clc; close all
 % displays |G_n(j2*pi*f)|, n = 1,...,4, over 10-20 Hz.
 
 % Add NL-FRA functions using a path relative to this example file.
-this_file = mfilename('fullpath');
-examples_dir = fileparts(this_file);
-repo_root = fileparts(examples_dir);
-addpath(fullfile(repo_root,'NOFRF'));
-addpath(examples_dir);
+addpath('C:\Users\rajin\OneDrive - Coventry University\PhD project\GitHub\NL-FRA\NOFRF\');
 
 %% Sampling and input definition from Eq. (36)
 Fs = 200;               % Ts = 0.005 s in the paper
