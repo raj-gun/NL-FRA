@@ -5,12 +5,8 @@ clear; clc; close all;
 % The example follows the low-amplitude local approximation shown in
 % Figs. 5.9 and 5.10 of the MPhil thesis.
 
-%% Repository paths
-this_file = mfilename('fullpath');
-examples_dir = fileparts(this_file);
-repo_root = fileparts(examples_dir);
-addpath(fullfile(repo_root,'NOFRF'));
-addpath(examples_dir);
+%% Paths
+addpath('C:\Users\rajin\OneDrive - Coventry University\PhD project\GitHub\NL-FRA\NOFRF\');
 
 %% Frequency range
 frq_rng = linspace(1,35,200);
