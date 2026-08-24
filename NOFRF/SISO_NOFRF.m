@@ -1,5 +1,19 @@
 function [Norm_SSE_abs_LS_2,Norm_SSE_arg_LS_2,Norm_SSE_LS_2,Fe_n_Yn,Fe_p_Yn,Y_NOFRF_MLS_n,Y_NOFRF_LS_2,G_LS_2,sse,Y_model] = ...
     SISO_NOFRF(Fs,Ts,tspan,fftn,f1,f2,u_nofrf,A,Amp,nl_ord_set,gc,harm_inpt,lw,norm,displ,Y, y_test)
+
+%% Display controls
+% displ(1) - LS evaluation information
+% displ(2) - NOFRF prediction/validation plots
+% displ(3) - U_n, Y and valid-frequency plots
+% displ(4) - NOFRF magnitude/phase plots
+%
+% Backward compatibility: existing callers using a three-element display
+% vector (e.g. displ = [1,1,1]) retain the previous behaviour, where the
+% NOFRF magnitude/phase plots are enabled.
+if numel(displ) < 4
+    displ(4) = 1;
+end
+
 %% Evaluate NOFRFs
 
 N = max(nl_ord_set);
@@ -20,9 +34,11 @@ w = [0:Fs/len_adj:(Fs/2)];
 w_adj = w(1:len_adj_hlf);
 
 % -------------------- Plot NOFRFs -----------------------------
-% NOFRF_plots(G_LS_2, N, w_adj, freq_rng_all, rmv_U_mat, gc, harm_inpt, lw, norm);
-NOFRF_plots(G_LS_2, N, nl_ord_set, w_adj, freq_rng_all, rmv_U_mat, gc, harm_inpt, lw, norm);
-NOFRF_plplots(G_LS_2, N, rmv_U_mat, gc, lw, norm);
+if displ(4) == 1
+    % NOFRF_plots(G_LS_2, N, w_adj, freq_rng_all, rmv_U_mat, gc, harm_inpt, lw, norm);
+    NOFRF_plots(G_LS_2, N, nl_ord_set, w_adj, freq_rng_all, rmv_U_mat, gc, harm_inpt, lw, norm);
+    NOFRF_plplots(G_LS_2, N, rmv_U_mat, gc, lw, norm);
+end
 
 % ----------------------------- U-mat, Y-mat & Valid freq -------------------------------
 n_A = length(Amp);
