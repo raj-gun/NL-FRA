@@ -9,7 +9,6 @@ clear all; clc; close all
 
 % Add NL-FRA functions using a path relative to this example file.
 addpath('C:\Users\rajin\OneDrive - Coventry University\PhD project\GitHub\NL-FRA\NOFRF\');
-addpath('C:\Users\rajin\OneDrive - Coventry University\PhD project\GitHub\NL-FRA\Examples');
 
 %% Sampling and input definition from Eq. (36)
 Fs = 200;               % Ts = 0.005 s in the paper

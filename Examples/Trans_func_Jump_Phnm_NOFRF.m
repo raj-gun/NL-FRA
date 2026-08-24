@@ -6,11 +6,7 @@ clear; clc; close all;
 % Figs. 5.9 and 5.10 of the MPhil thesis.
 
 %% Repository paths
-this_file = mfilename('fullpath');
-examples_dir = fileparts(this_file);
-repo_root = fileparts(examples_dir);
-addpath(fullfile(repo_root,'NOFRF'));
-addpath(examples_dir);
+addpath('C:\Users\rajin\OneDrive - Coventry University\PhD project\GitHub\NL-FRA\NOFRF\');
 
 %% Frequency range
 frq_rng = linspace(1,35,200);
@@ -42,7 +38,7 @@ A = linspace(1.3,1.2,N)';
 n_A = length(A);
 
 % The evaluated NOFRFs are tested outside A1 at A = 1.5.
-Amp = 1.5;
+Amp = 1.4;
 
 % SISO_NOFRF display options
 % displ(1) - LS evaluation information
@@ -240,7 +236,7 @@ xlim([0 120]);
 function dy = ODE_func(t,Y,f1,Amp)
 
 w0 = 12*pi;
-C = 2*0.04*w0;
+C = 10*0.04*w0;
 K1 = w0^2;
 K3 = 0.1*w0^6;
 
