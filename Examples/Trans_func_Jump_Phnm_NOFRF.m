@@ -30,15 +30,15 @@ len_adj = fftn;
 len_adj_hlf = floor(len_adj/2)+1;
 
 %% NOFRF settings
-nl_ord_set = 1:9;
+nl_ord_set = 1:7;
 N = max(nl_ord_set);
 
-% NOFRFs are evaluated over A1 = [1.3,1.2] using nine amplitudes.
-A = linspace(1.3,1.2,N)';
+% NOFRFs are evaluated using the seven input amplitudes in equation (5.20).
+A = [0.2,0.18333,0.16667,0.15,0.13333,0.11667,0.1]';
 n_A = length(A);
 
-% The evaluated NOFRFs are tested outside A1 at A = 1.5.
-Amp = 1.5;
+% The evaluated NOFRFs are tested at A = 0.4 as in Fig. 5.5.
+Amp = 0.4;
 
 % SISO_NOFRF display options
 % displ(1) - LS evaluation information
@@ -70,7 +70,7 @@ for i = 1:len_frq_rng
     f1 = frq_rng(i);
     f2 = f1;
 
-    u_full = cos(2*pi*f1*tspan_full);
+    u_full = sin(2*pi*f1*tspan_full);
     u = u_full(i_tz:end);
     u = u(1:len);
 
@@ -102,8 +102,8 @@ for i = 1:len_frq_rng
     f1 = frq_rng(i);
     f2 = f1;
 
-    % Unit-amplitude reference input and the test input at Amp = 1.5.
-    u_ref_full = cos(2*pi*f1*tspan_full);
+    % Unit-amplitude reference input and the test input at Amp = 0.4.
+    u_ref_full = sin(2*pi*f1*tspan_full);
     u_ref = u_ref_full(i_tz:end);
     u_ref = u_ref(1:len);
     u = Amp.*u_ref;
@@ -235,12 +235,11 @@ xlim([0 120]);
 %% Local Functions
 function dy = ODE_func(t,Y,f1,Amp)
 
-w0 = 12*pi;
-C = 2*0.04*w0;
-K1 = w0^2;
-K3 = 0.1*w0^6;
+C = 3.84*pi;
+K1 = (12*pi)^2;
+K3 = 0.1*(12*pi)^6;
 
-u = Amp.*cos(2*pi*f1*t);
+u = Amp.*sin(2*pi*f1*t);
 
 dy = [Y(2);...
       u - C.*Y(2) - K1.*Y(1) - K3.*Y(1).^3];
