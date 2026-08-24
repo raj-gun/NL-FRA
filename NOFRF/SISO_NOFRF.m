@@ -41,9 +41,8 @@ if displ(4) == 1
 end
 
 % ----------------------------- U-mat, Y-mat & Valid freq -------------------------------
-n_A = length(Amp);
+n_A = length(A);
 if displ(3) == 1
-    % NOFRF_plot_Un_Y_vfreq(tspan, u_nofrf, Y, y_test, Y_NOFRF_LS_2, A, n_A, N, Ts, Fs, len_adj, len_adj_hlf, freq_rng_all, rmv_U_mat, harm_inpt, lw);
     NOFRF_plot_Un_Y_vfreq(tspan, u_nofrf, Y, y_test, Y_NOFRF_LS_2, A, n_A, N, nl_ord_set, Ts, Fs, len_adj, len_adj_hlf, freq_rng_all, rmv_U_mat, harm_inpt, lw)
 end
 %%

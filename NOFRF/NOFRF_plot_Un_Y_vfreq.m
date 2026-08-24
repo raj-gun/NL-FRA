@@ -25,6 +25,9 @@ for i = nl_ord_set%1:N
         stem(w(logical(rmv_U_mat(:,i))) ,  abs( U_mat( logical(rmv_U_mat(:,i)) ,i) ) ,'LineWidth',lw);axis([x_rng -inf inf]);
     end
     title(['U',num2str(i)]);
+    if mod(i,2) == 1; ylabel('Magnitude'); end %Every odd nonlinearity
+    if i == nl_ord_set(find(mod(nl_ord_set, 2) == 0, 1, 'last')); xlabel('Freqeuncy (Hz)'); end %Last even nonlinerity
+    if i == nl_ord_set(find(mod(nl_ord_set, 2) ~= 0, 1, 'last')); xlabel('Freqeuncy (Hz)'); end %Last odd nonlinerity
 end
 sgtitle('Mag \it U_n(j\omega)\rm');
 
@@ -37,6 +40,9 @@ for i = nl_ord_set%1:N
         stem(w(logical(rmv_U_mat(:,i))) ,  angle(U_mat(logical(rmv_U_mat(:,i)) ,i )).*(180/pi) ,'LineWidth',lw);axis([x_rng -inf inf]);
     end
     title(['U',num2str(i)]);
+    if mod(i,2) == 1; ylabel('Phase'); end %Every odd nonlinearity
+    if i == nl_ord_set(find(mod(nl_ord_set, 2) == 0, 1, 'last')); xlabel('Freqeuncy (Hz)'); end %Last even nonlinerity
+    if i == nl_ord_set(find(mod(nl_ord_set, 2) ~= 0, 1, 'last')); xlabel('Freqeuncy (Hz)'); end %Last odd nonlinerity
 end
 sgtitle('Phase \it U_n(j\omega)\rm');
 
@@ -53,18 +59,25 @@ figure;
 for i = 1:n_A
     subplot(n_A,1,i);plot(w,abs(Y_mat(:,i)));title(['Amp = ',num2str(A(i))]);set(gca, 'YScale', 'log');
 end
+xlabel('Frequency (Hz)');
+sgtitle('Output spectra for different input magnitudes');
 
 figure;
 for i = 1:n_A
     subplot(n_A,1,i);plot(tspan,Y(:,i));title(['Amp = ',num2str(A(i))]);
 end
+xlabel('Time (sec)');
+sgtitle('Output respose for different input magnitudes');
 
 %% -------------------- NOFRF valid freq ranges -------------------
 
 figure;
 for i = 1:N
     subplot(N,1,i);area(w,rmv_U_mat(:,i));axis([x_rng -inf inf]);
+    ylabel(['$Y_', num2str(i) ,'(j\omega)$'], 'Interpreter', 'LaTeX', 'Rotation', 0, FontSize=12); yticks([]);
 end
+xlabel('Freqeuncy (Hz)', FontSize=12);
+sgtitle('Frequency space of $Y_n(j\omega)$', 'Interpreter', 'LaTeX');
 
 % figure;subplot(2,1,1);plot(w,abs(U_mat(1:len_adj_hlf,1)));
 % subplot(2,1,2);plot(w,abs(Y_mat(:,n_A)));
@@ -76,6 +89,7 @@ if harm_inpt == 0
 else
     stem(w(logical(freq_rng_all)) ,  abs( U_mat(logical(freq_rng_all),1) ),'LineWidth',lw);axis([x_rng -inf inf]);
 end
+ylabel('Magnitude',FontSize=12);
 subplot(2,1,2);
 Y_fft = fft(y_test,len_adj).*Ts;
 Y_vec = Y_fft(1:len_adj_hlf);
@@ -85,6 +99,10 @@ else
     stem(w(logical(freq_rng_all)) ,  abs( Y_vec(logical(freq_rng_all)) ),'LineWidth',lw);axis([x_rng -inf inf]);hold on;
     stem(w(logical(freq_rng_all)) ,  abs( Y_NOFRF_LS_2(logical(freq_rng_all)) ),'r--','LineWidth',lw);
 end
+legend({'Actual','NOFRF'});
+ylabel('Magnitude', FontSize=12);
+xlabel('Freqeuncy (Hz)', FontSize=12);
+sgtitle('Input-Ouput spectra');
 
 
 end

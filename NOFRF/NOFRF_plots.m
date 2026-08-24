@@ -74,6 +74,9 @@ for i = nl_ord_set%1:N
         
     end
     title(['G',num2str(i)]);
+    if mod(i,2) == 1; ylabel('Magnitude'); end %Every odd nonlinearity
+    if i == nl_ord_set(find(mod(nl_ord_set, 2) == 0, 1, 'last')); xlabel('Freqeuncy (Hz)'); end %Last even nonlinerity
+    if i == nl_ord_set(find(mod(nl_ord_set, 2) ~= 0, 1, 'last')); xlabel('Freqeuncy (Hz)'); end %Last odd nonlinerity
 end
 if norm == 1
     sgtitle('Normalised Mag-NOFRF \it G_n(j\omega)\rm');
@@ -114,6 +117,9 @@ for i = nl_ord_set%1:N
         stem(w_adj(logical(rmv_U_mat(:,i))) ,  angle(G_LS_2(logical(rmv_U_mat(:,i)) ,i )).*(180/pi) ,'Color' , c,'LineWidth',lw);axis([x_rng -inf inf]);hold on;
     end
     title(['G',num2str(i)]);
+    if mod(i,2) == 1; ylabel('Phase'); end %Every odd nonlinearity
+    if i == nl_ord_set(find(mod(nl_ord_set, 2) == 0, 1, 'last')); xlabel('Freqeuncy (Hz)'); end %Last even nonlinerity
+    if i == nl_ord_set(find(mod(nl_ord_set, 2) ~= 0, 1, 'last')); xlabel('Freqeuncy (Hz)'); end %Last odd nonlinerity
 end
 sgtitle('Phase-NOFRF \it G_n(j\omega)\rm');
 

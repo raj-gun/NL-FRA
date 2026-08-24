@@ -31,7 +31,7 @@ u = u_full(i_tz:end);
 u = u(1:len);
 
 %% Generate data using the nonlinear oscillator and RK4
-nl_ord_set = 1:9;
+nl_ord_set = 1:5;
 N = max(nl_ord_set);
 
 % NOFRFs are evaluated over A1 = [1.3,1.2] using nine amplitudes.

@@ -5,6 +5,7 @@ N_rem = N - 2*N_hlf;
 
 
 figure;
+nl_ord_set = 1:N;
 for i = 1:N
     subplot(2, N_hlf+N_rem, i);
     theta = angle(G_LS_2(logical(rmv_U_mat(:,i)),i));
@@ -20,7 +21,7 @@ for i = 1:N
     
     title(['G',num2str(i)]);
 end
-subtitle('Polar-NOFRF \it G_n(j\omega)\rm');
+sgtitle('Polar-NOFRF \it G_n(j\omega)\rm');
 
 
 end

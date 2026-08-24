@@ -39,7 +39,8 @@ if draw_plt == 1
         stem(w(logical(freq_rng_all)) ,  abs( Y_vec(logical(freq_rng_all)) ) ,'LineWidth',lw);axis([x_rng -inf inf]);hold on;
         stem(w(logical(freq_rng_all)) ,  abs( Y_NOFRF_LS_2(logical(freq_rng_all)) ), 'Color' , 'r','LineWidth',lw);
     end
-    title('Mod-LS');
+    legend({'Actual', 'NOFRF'});
+    ylabel('Magnitude');
     subplot(2,1,2);
     if harm_inpt == 0
         plot(w,angle(Y_vec).*(180/pi));hold on;plot(w,angle(Y_NOFRF_LS_2).*(180/pi),'r--');
@@ -47,6 +48,10 @@ if draw_plt == 1
         stem(w(logical(freq_rng_all)) ,  angle( Y_vec(logical(freq_rng_all)) ).*(180/pi) ,'LineWidth',lw);axis([x_rng -inf inf]);hold on;
         stem(w(logical(freq_rng_all)) ,  angle( Y_NOFRF_LS_2(logical(freq_rng_all)) ).*(180/pi), 'Color' , 'r','LineWidth',lw);
     end
+    legend({'Actual', 'NOFRF'});
+    ylabel('Phase');
+    xlabel('Frequency (Hz)');
+    sgtitle('Mag. and Phase Plot');
     
     Y_NOFRF_MLS_n_t = zeros(size(Y_NOFRF_MLS_n));
     %x_rng = [0,inf];
@@ -58,6 +63,7 @@ if draw_plt == 1
     %Y_NOFRF_MLS_n_mag_freq = Y_NOFRF_MLS_n_log_mag(freq_rng_all,:);
     
     figure;
+    nl_ord = 1:N;
     for i = 1:N
         subplot(N_hlf+N_rem, 2 , i);
         if norm == 0
@@ -78,6 +84,9 @@ if draw_plt == 1
             title(['Y-norm',num2str(i)]);
             Y_NOFRF_MLS_n_t(:,i) = ifft(Y_NOFRF_MLS_n(:,i),'symmetric');
         end
+        if mod(i,2) == 1; ylabel('Magnitude'); end %Every odd nonlinearity
+        if i == nl_ord(find(mod(nl_ord, 2) == 0, 1, 'last')); xlabel('Freqeuncy (Hz)'); end %Last even nonlinerity
+        if i == nl_ord(find(mod(nl_ord, 2) ~= 0, 1, 'last')); xlabel('Freqeuncy (Hz)'); end %Last odd nonlinerity
     end
     sgtitle('Mag-OFRF \it Y_n(j\omega)\rm');
     
@@ -91,6 +100,9 @@ if draw_plt == 1
             stem(w2(logical(rmv_U_mat(2:end,i))) ,  Y_NOFRF_MLS_n_log_mag(logical(rmv_U_mat(2:end,i)) ,i ), 'Color' , c,'LineWidth',lw);axis([x_rng -inf inf]);hold on;
         end
         title(['Y',num2str(i)]);
+        if mod(i,2) == 1; ylabel('Magnitude'); end %Every odd nonlinearity
+        if i == nl_ord(find(mod(nl_ord, 2) == 0, 1, 'last')); xlabel('Freqeuncy (Hz)'); end %Last even nonlinerity
+        if i == nl_ord(find(mod(nl_ord, 2) ~= 0, 1, 'last')); xlabel('Freqeuncy (Hz)'); end %Last odd nonlinerity
     end
     sgtitle('Log-Mag-OFRF \it Y_n(j\omega)\rm');
     
@@ -103,6 +115,9 @@ if draw_plt == 1
             stem(w2(logical(rmv_U_mat(2:end,i))) ,  angle(Y_NOFRF_MLS_n(logical(rmv_U_mat(2:end,i)) ,i )).*(180/pi) , 'Color' , c,'LineWidth',lw);axis([x_rng -inf inf]);hold on;
         end
         title(['Y',num2str(i)]);
+        if mod(i,2) == 1; ylabel('Phase'); end %Every odd nonlinearity
+        if i == nl_ord(find(mod(nl_ord, 2) == 0, 1, 'last')); xlabel('Freqeuncy (Hz)'); end %Last even nonlinerity
+        if i == nl_ord(find(mod(nl_ord, 2) ~= 0, 1, 'last')); xlabel('Freqeuncy (Hz)'); end %Last odd nonlinerity
     end
     sgtitle('Phase-OFRF \it Y_n(j\omega)\rm');
     
