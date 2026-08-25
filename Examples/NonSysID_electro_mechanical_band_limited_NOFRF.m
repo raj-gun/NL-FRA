@@ -8,18 +8,12 @@ clear all; clc; close all
 % input, and evaluates the first four NOFRFs.
 
 % Add NL-FRA and NonSysID functions using paths relative to this example file.
-example_dir = fileparts(mfilename('fullpath'));
-nlfra_root = fileparts(example_dir);
-nonsysid_root = fullfile(fileparts(nlfra_root),'NonSysID');
-
-addpath(fullfile(nlfra_root,'NOFRF'));
-addpath(fullfile(nonsysid_root,'NonSysID'));
+addpath('C:\Users\rajin\OneDrive - Coventry University\PhD project\GitHub\NonSysID\NonSysID\');
+addpath('C:\Users\rajin\OneDrive - Coventry University\PhD project\GitHub\NL-FRA\NOFRF');
 
 %% Identify NARX model from the electro-mechanical system data
-u_ID_dat = readmatrix(fullfile(nonsysid_root,'Examples', ...
-    'Electro-mechanical_system','Data','x_cc.csv'));
-y_ID_dat = readmatrix(fullfile(nonsysid_root,'Examples', ...
-    'Electro-mechanical_system','Data','y_cc.csv'));
+u_ID_dat = readmatrix('C:\Users\rajin\OneDrive - Coventry University\PhD project\GitHub\NonSysID\Examples\Electro-mechanical_system\Data\x_cc.csv'); 
+y_ID_dat = readmatrix('C:\Users\rajin\OneDrive - Coventry University\PhD project\GitHub\NonSysID\Examples\Electro-mechanical_system\Data\y_cc.csv');
 
 % Down sample data as in the NonSysID electro-mechanical system example.
 dwn_smpl = 100;
@@ -59,16 +53,16 @@ n_inpts = 1;
 KSA_h = 20;
 
 % Specify which RCT method to use, 1-4, 0 for no RCT.
-RCT = 4;
+RCT = 3;
 
 % Do not generate the NonSysID simulation plots in this example.
-sim = [0,0];
+sim = [1,1];
 
 % Set to 1 to display all models generated from iOFRs, 0 otherwise.
 displ = 0;
 
 % Set 1 or 0 to use parallel processing for [linear model, nonlinear model].
-parall = [1,1];
+parall = [0,0];
 
 [model,~,iOFR_table_lin,iOFR_table_nl,best_mod_ind_lin,best_mod_ind_nl,~] = ...
     NonSysID(mod_type,u_ID,y_ID,na1,na2,nb1,nb2,nl_ord_max,is_bias, ...
@@ -95,11 +89,12 @@ fftn = length(tspan)-1;
 % u(t) = Amp_2*(3/(2*pi))*[sin(2*pi*55*t)-sin(2*pi*30*t)]/t
 % Amp_2 = 1/15 gives a finite value of 5 at t = 0, matching the upper
 % input level present in the electro-mechanical identification data.
-f1 = 55;
-f2 = 30;
-Amp_2 = 1/15;
+f1 = 3.5;
+f2 = 2;
+Amp_2 = 1;
 u = Amp_2 .* sinc_difference_input(tspan,f1,f2);
 u = u(:);
+u = u .* (std(u_ID)/std(u));
 len = length(u);
 
 % Multiple constant input gains for LS-based NOFRF evaluation.
