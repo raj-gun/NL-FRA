@@ -1,4 +1,4 @@
-%{1
+%{
 clear all; clc; close all
 
 % Wigren and Schoukens (2017), Coupled Electric Drives Data Set and
@@ -83,7 +83,7 @@ figure;plot(y_val()); hold on; plot(y_test(:,1));
 %}
 %%
 %{1
-% close all;
+close all;
 %% Sampling and input definition
 Fs = 50;                 % Ts = 0.02 s in the CED benchmark
 Ts = 1/Fs;
@@ -98,12 +98,12 @@ fftn = length(tspan)-1;
 f1 = 6.5;                 % upper edge of input band (Hz); f1 > f2 [3.5*1.833,3.5]
 f2 = 3.5;                  % lower edge of input band (Hz)
 u = sinc_difference_input(tspan,f1,f2)';
-u = u .* (std(u_ID)/std(u)) .* 0.4;
+u = u .* (std(u_ID)/std(u)) .* 0.1;
 len = length(u);
 
 % Multiple constant input gains for LS-based NOFRF evaluation.
 % The NOFRFs are invariant to a constant scaling of the probing input.
-N = 4; % Order of nonlinearity to consider
+N = ;
 n_A = N;
 A = linspace(0.9,0.5,n_A)';
 Y = zeros(len,n_A);
