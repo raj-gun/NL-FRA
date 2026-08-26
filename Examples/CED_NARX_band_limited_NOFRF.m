@@ -55,7 +55,7 @@ displ = 0; % Set to 1 to display all models generated from iOFRs, 0 otherwise
 
 % Set 1 or 0 to use parallel processing to accelerate iOFRs,
 % for [linear model, nonlinear model]
-parall = [0,1];
+parall = [0,0];
 
 [model,~,iOFR_table_lin,iOFR_table_nl,best_mod_ind_lin,best_mod_ind_nl,~] = ...
     NonSysID(mod_type,u_ID,y_ID,na1,na2,nb1,nb2,nl_ord_max,is_bias, ...
