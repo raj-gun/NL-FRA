@@ -45,7 +45,7 @@ n_inpts = 1; % Specify number of inputs
 x_iOFR = [false,false]; % Run more than one iteration of iOFR for [linear model, nonlinear model]
 
 stp_cri = {'PRESS_min','PRESS_thresh'}; % Stopping criteria for [linear model, nonlinear model].
-D1_thresh = [10^(-5),10^(-5)];
+D1_thresh = [ 0 ,10^(-5)]; % PRESS_min for initial linear ARX model. I.e. automatic stopping, check NonSysID documentation.
 
 KSA_h = 20; % Specify the number of steps for k-steps ahead prediction
 RCT = 4; % Specify which RCT method to use, 1-4, 0 for no RCT.
@@ -55,7 +55,7 @@ displ = 0; % Set to 1 to display all models generated from iOFRs, 0 otherwise
 
 % Set 1 or 0 to use parallel processing to accelerate iOFRs,
 % for [linear model, nonlinear model]
-parall = [0,0];
+parall = [0,1];
 
 [model,~,iOFR_table_lin,iOFR_table_nl,best_mod_ind_lin,best_mod_ind_nl,~] = ...
     NonSysID(mod_type,u_ID,y_ID,na1,na2,nb1,nb2,nl_ord_max,is_bias, ...
@@ -82,7 +82,7 @@ figure;plot(y_val()); hold on; plot(y_test(:,1));
 
 %}
 %%
-%{1
+%{
 % close all;
 %% Sampling and input definition
 Fs = 50;                 % Ts = 0.02 s in the CED benchmark
