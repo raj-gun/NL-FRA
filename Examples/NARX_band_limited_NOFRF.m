@@ -38,14 +38,14 @@ y_val = z12(:);
 mod_type = 'ARX'; % Model type ARX/AR
 na1 = 1; na2 = 9; % Maximum and minimum output lags
 nb1 = 1; nb2 = 7; % Maximum and minimum input lags
-nl_ord_max = 2; % Maximum order of polynomial nonlinearity considered
+nl_ord_max = 3; % Maximum order of polynomial nonlinearity considered
 is_bias = 0; % Specify if bias/DC offset is required, 0, or not, 1.
 n_inpts = 1; % Specify number of inputs
 
 x_iOFR = [false,false]; % Run more than one iteration of iOFR for [linear model, nonlinear model]
 
 stp_cri = {'PRESS_min','PRESS_thresh'}; % Stopping criteria for [linear model, nonlinear model].
-D1_thresh = [ 0 ,10^(-5)]; % PRESS_min for initial linear ARX model. I.e. automatic stopping, check NonSysID documentation.
+D1_thresh = [ 0 ,10^(-4.5)]; % PRESS_min for initial linear ARX model. I.e. automatic stopping, check NonSysID documentation.
 
 KSA_h = 20; % Specify the number of steps for k-steps ahead prediction
 RCT = 4; % Specify which RCT method to use, 1-4, 0 for no RCT.
