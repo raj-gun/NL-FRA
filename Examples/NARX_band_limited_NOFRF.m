@@ -18,7 +18,7 @@ clear all; clc; close all
 addpath('C:\Users\rajin\OneDrive - Coventry University\PhD project\GitHub\NonSysID\NonSysID\');
 addpath('C:\Users\rajin\OneDrive - Coventry University\PhD project\GitHub\NL-FRA\NOFRF');
 
-%% Import CED data and identify NARX model
+%% Import CED data 
 % DATAUNIF.MAT is distributed with the Coupled Electric Drives benchmark:
 % https://uu.diva-portal.org/smash/get/diva2:1165531/FULLTEXT01.zip
 %
@@ -34,18 +34,19 @@ y_ID = z11(:);
 u_val = u12(:);
 y_val = z12(:);
 
+%% Identify NARX model
 
 mod_type = 'ARX'; % Model type ARX/AR
 na1 = 1; na2 = 9; % Maximum and minimum output lags
 nb1 = 1; nb2 = 7; % Maximum and minimum input lags
-nl_ord_max = 3; % Maximum order of polynomial nonlinearity considered
+nl_ord_max = 2; % Maximum order of polynomial nonlinearity considered
 is_bias = 0; % Specify if bias/DC offset is required, 0, or not, 1.
 n_inpts = 1; % Specify number of inputs
 
 x_iOFR = [false,false]; % Run more than one iteration of iOFR for [linear model, nonlinear model]
 
 stp_cri = {'PRESS_min','PRESS_thresh'}; % Stopping criteria for [linear model, nonlinear model].
-D1_thresh = [ 0 ,10^(-4.5)]; % PRESS_min for initial linear ARX model. I.e. automatic stopping, check NonSysID documentation.
+D1_thresh = [ 0 ,10^(-5)]; % PRESS_min for initial linear ARX model. I.e. automatic stopping, check NonSysID documentation.
 
 KSA_h = 20; % Specify the number of steps for k-steps ahead prediction
 RCT = 4; % Specify which RCT method to use, 1-4, 0 for no RCT.
@@ -55,7 +56,7 @@ displ = 0; % Set to 1 to display all models generated from iOFRs, 0 otherwise
 
 % Set 1 or 0 to use parallel processing to accelerate iOFRs,
 % for [linear model, nonlinear model]
-parall = [0,1];
+parall = [0,0];
 
 [model,~,iOFR_table_lin,iOFR_table_nl,best_mod_ind_lin,best_mod_ind_nl,~] = ...
     NonSysID(mod_type,u_ID,y_ID,na1,na2,nb1,nb2,nl_ord_max,is_bias, ...
@@ -82,7 +83,7 @@ figure;plot(y_val()); hold on; plot(y_test(:,1));
 
 %}
 %%
-%{
+%{1
 % close all;
 %% Sampling and input definition
 Fs = 50;                 % Ts = 0.02 s in the CED benchmark
