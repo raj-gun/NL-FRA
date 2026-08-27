@@ -46,7 +46,7 @@ For a discrete multi-tone probing input, use `nofrf_test_comp`.
 
 | Output | Type | Description |
 |---|---|---|
-| `Yn_NOFRF` | `matrix` | Reconstructed nonlinear-order output contributions. Column `n` contains `Y_n(jw) = G_n(jw)U_n(jw)` at the retained frequency bins. |
+| `Yn_NOFRF` | `matrix` | Reconstructed nonlinear-order output contributions. Column `n` contains $`Y_n(j\omega)=G_n(j\omega)U_n(j\omega)`$ at the retained frequency bins. |
 | `Y_NOFRF` | `vector` | Total reconstructed output spectrum obtained by summing `Yn_NOFRF` over nonlinear order. |
 | `len_adj_hlf` | `int` | Number of retained non-negative frequency bins after applying the valid-frequency support. |
 
@@ -61,17 +61,17 @@ For a discrete multi-tone probing input, use `nofrf_test_comp`.
    fft(u.^n,len_adj).*Ts.*((1/sqrt(n))/((2*pi)^(n-1)))
    ```
 
-3. Apply the test-amplitude factor `Amp^n` to the `n`-th order input composition.
+3. Apply the test-amplitude factor `Amp^n` to the $`n`$-th order input composition.
 4. Multiply each valid input composition by the corresponding evaluated NOFRF.
 5. Sum all nonlinear-order contributions to obtain the total reconstructed output spectrum.
 
 In compact form, the routine evaluates
 
-\[
+```math
 Y_n(j\omega)=G_n(j\omega)\,A^nU_n(j\omega),
 \qquad
 Y(j\omega)=\sum_{n=1}^{N}Y_n(j\omega),
-\]
+```
 
 within the valid frequency support of each nonlinear order.
 
