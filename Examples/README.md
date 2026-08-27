@@ -5,7 +5,7 @@ This folder contains example scripts demonstrating the main SISO workflows avail
 ## Examples
 
 - [`NARX_band_limited_NOFRF.m`](./NARX_band_limited_NOFRF.m)  
-  Data-driven example based on the coupled electric-drives benchmark. A polynomial NARX model is first identified using `NonSysID`, independently validated, and then excited using a general band-limited probing input. The resulting input-output data are used to evaluate and validate the first four NOFRFs. For information related to the dataset used, refere to the relevant [`README`](/Examples/Data/Coupled_electric_drive/README.md).    
+  Data-driven example based on the coupled electric-drives benchmark. A polynomial NARX model is first identified using `NonSysID`, independently validated, and then excited using a general band-limited probing input. The resulting input-output data are used to evaluate and validate the first four NOFRFs. For information related to the dataset used, refer to the relevant [`README`](/Examples/Data/Coupled_electric_drive/README.md).    
 
 - [`NonSysID_electro_mechanical_band_limited_NOFRF.m`](./NonSysID_electro_mechanical_band_limited_NOFRF.m)  
   Identifies a polynomial NARX model from the electro-mechanical system data used in the `NonSysID` examples, excites the identified model using a general band-limited input, and evaluates the first four NOFRFs. This example requires the `NonSysID` package.
