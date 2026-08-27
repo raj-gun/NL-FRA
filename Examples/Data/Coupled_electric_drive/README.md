@@ -1,6 +1,6 @@
-# Coupled Electric Drives Data Set
+# Coupled Electric Drives Dataset
 
-This folder contains the **Coupled Electric Drives (CED)** benchmark data used by the NL-FRA examples.
+This is a brief explanation of the **Coupled Electric Drives (CED)** benchmark data used by the NL-FRA examples.
 
 The benchmark system consists of two electric motors driving a pulley through a flexible belt. The pulley is restrained by a spring, which introduces a lightly damped dynamic mode. The two electric drives can be controlled independently, allowing the belt tension and belt speed to be controlled simultaneously. The benchmark considered here focuses on the speed-control dynamics. The pulley angular speed is measured using a pulse counter; the sensor is insensitive to the sign of the velocity. The relatively short available data records make the benchmark useful for testing nonlinear system-identification methods.
 
@@ -18,10 +18,6 @@ The data set and reference models were published by Torbjörn Wigren and Maarten
 
 - **Original data download:**  
   https://uu.diva-portal.org/smash/get/diva2:1165531/FULLTEXT01.zip
-
-The original ZIP archive contains the system description and the available data sets in both MATLAB (`.MAT`) and CSV formats.
-
-## Files in this Folder
 
 - `DATAUNIF.MAT` / `DATAUNIF.csv` — uniformly distributed-input data records.
 - `DATAPRBS.MAT` / `DATAPRBS.csv` — pseudo-random binary sequence (PRBS) input data records.
