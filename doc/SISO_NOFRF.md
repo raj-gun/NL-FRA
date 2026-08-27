@@ -61,7 +61,7 @@ For discrete multi-tone probing inputs, use `SISO_NOFRF_comp`, which follows the
 |---|---|
 | `displ(1)` | Display LS evaluation information and normalised SSE values. |
 | `displ(2)` | Display NOFRF prediction/validation plots. |
-| `displ(3)` | Display input compositions `U_n`, output spectra and valid-frequency regions. |
+| `displ(3)` | Display input compositions $`U_n`$, output spectra and valid-frequency regions. |
 | `displ(4)` | Display NOFRF magnitude/phase plots. |
 
 For example, `displ = [1,1,1,1]` enables all available output, while `displ = [0,0,0,0]` is useful when repeatedly evaluating local NOFRFs inside a frequency sweep.
@@ -91,8 +91,8 @@ For example, `displ = [1,1,1,1]` enables all available output, while `displ = [0
 2. **Construct nonlinear input compositions**: The FFTs of `u_nofrf.^n` are scaled according to the NOFRF input-composition definition.
 3. **Form the LS information matrix**: At each frequency, only nonlinear orders whose input compositions are valid at that frequency are retained.
 4. **Estimate NOFRFs**: The real and imaginary parts of the frequency-domain equations are solved using least squares.
-5. **Reconstruct the output**: The evaluated `G_n(jw)` functions are combined with the test input compositions to generate `Y_n(jw)` and the total NOFRF output.
-6. **Validate and visualise**: The reconstructed response is compared with `y_test`; optional plots show the valid frequency spaces, `U_n`, `G_n` and `Y_n`.
+5. **Reconstruct the output**: The evaluated $`G_n(j\omega)`$ functions are combined with the test input compositions to generate $`Y_n(j\omega)`$ and the total NOFRF output.
+6. **Validate and visualise**: The reconstructed response is compared with `y_test`; optional plots show the valid frequency spaces, $`U_n`$, $`G_n`$ and $`Y_n`$.
 
 ---
 
@@ -152,7 +152,7 @@ Amp = 1.4;
 - The LS method relies on several responses generated using constant amplitude scalings of the same probing input.
 - `Y` must contain one response per amplitude factor in `A`.
 - For reliable evaluation, use enough independent amplitude scalings to resolve the nonlinear orders contributing at a given frequency.
-- The valid frequency support is sparse and order dependent. NL-FRA removes invalid `U_n(jw)` terms before solving the LS equations.
+- The valid frequency support is sparse and order dependent. NL-FRA removes invalid $`U_n(j\omega)`$ terms before solving the LS equations.
 - `SISO_NOFRF` is used for continuous band-limited support and also for the single-tone/sinusoidal case by setting `f1 = f2`.
 - `SISO_NOFRF_comp` is intended for a known set of discrete positive-frequency components.
 
