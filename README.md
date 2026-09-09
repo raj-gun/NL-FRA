@@ -95,13 +95,27 @@ See the [Example Code Structure](doc/Example_code_structure.md) for a step-by-st
 
 ## Paper
 
-If you use NL-FRA for academic work, please cite the associated manuscript:
+If you are using the NL-FRA package for academic purposes, kindly reference our paper as follows:
 
-**NL-FRA: A MATLAB package for nonlinear frequency response analysis**  
-Rajintha Gunawardena, Zi-Qiang Lang, Fei He  
-Journal of Open Source Software manuscript, software version v0.1.0.
+**NL-FRA: A MATLAB package for nonlinear frequency response analysis**
 
-A DOI/BibTeX entry can be added here once the JOSS article is published.
+Rajintha Gunawardena, Zi-Qiang Lang, Fei He
+
+DOI: [10.48550/arXiv.2609.08723](https://doi.org/10.48550/arXiv.2609.08723)
+
+```
+@misc{Gunawardena2026,
+  doi = {10.48550/arXiv.2609.08723},
+  url = {https://doi.org/10.48550/arXiv.2609.08723},
+  year = {2026},
+  author = {Gunawardena, Rajintha and Lang, Zi-Qiang and He, Fei},
+  title = {NL-FRA: A MATLAB package for nonlinear frequency response analysis},
+  publisher = {arXiv},
+  eprint = {2609.08723},
+  archivePrefix = {arXiv},
+  primaryClass = {eess.SY}
+}
+```
 
 ## References
 [1] Z.-Q. Lang and S. A. Billings, “Energy transfer properties of non-linear systems in the frequency domain,” *International Journal of Control*, vol. 78, no. 5, pp. 345–362, 2005.
