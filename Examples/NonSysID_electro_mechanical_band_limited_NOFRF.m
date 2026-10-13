@@ -8,12 +8,12 @@ clear all; clc; close all
 % input, and evaluates the first four NOFRFs.
 
 % Add NL-FRA and NonSysID functions using paths relative to this example file.
-addpath('C:\Users\rajin\OneDrive - Coventry University\PhD project\GitHub\NonSysID\NonSysID\');
-addpath('C:\Users\rajin\OneDrive - Coventry University\PhD project\GitHub\NL-FRA\NOFRF');
+addpath('\....\NonSysID\NonSysID\');
+addpath('\....\NL-FRA\NOFRF');
 
 %% Identify NARX model from the electro-mechanical system data
-u_ID_dat = readmatrix('C:\Users\rajin\OneDrive - Coventry University\PhD project\GitHub\NonSysID\Examples\Electro-mechanical_system\Data\x_cc.csv'); 
-y_ID_dat = readmatrix('C:\Users\rajin\OneDrive - Coventry University\PhD project\GitHub\NonSysID\Examples\Electro-mechanical_system\Data\y_cc.csv');
+u_ID_dat = readmatrix('\....\NonSysID\Examples\Electro-mechanical_system\Data\x_cc.csv'); 
+y_ID_dat = readmatrix('\....\NonSysID\Examples\Electro-mechanical_system\Data\y_cc.csv');
 
 % Down sample data as in the NonSysID electro-mechanical system example.
 dwn_smpl = 100;
