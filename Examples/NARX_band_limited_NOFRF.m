@@ -15,15 +15,15 @@ clear all; clc; close all
 % contains 500 input-output samples.
 
 % Add NL-FRA and NonSysID functions using paths relative to this example file.
-addpath('C:\Users\rajin\OneDrive - Coventry University\PhD project\GitHub\NonSysID\NonSysID\');
-addpath('C:\Users\rajin\OneDrive - Coventry University\PhD project\GitHub\NL-FRA\NOFRF');
+addpath('\...\NonSysID\NonSysID\');
+addpath('\...\NL-FRA\NOFRF');
 
 %% Import CED data 
 % DATAUNIF.MAT is distributed with the Coupled Electric Drives benchmark:
 % https://uu.diva-portal.org/smash/get/diva2:1165531/FULLTEXT01.zip
 %
 % Place DATAUNIF.MAT in Examples/Data before running this example.
-load('C:\Users\rajin\OneDrive - Coventry University\PhD project\GitHub\NL-FRA\Examples\Data\Coupled_electric_drive\DATAUNIF.mat');
+load('\...\NL-FRA\Examples\Data\Coupled_electric_drive\DATAUNIF.mat');
 
 
 % Use the first uniformly distributed-input realization for identification.
